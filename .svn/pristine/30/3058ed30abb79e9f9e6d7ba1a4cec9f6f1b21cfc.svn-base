@@ -1,0 +1,26 @@
+#ifndef ZADANIE1__LEDS_H_
+#define ZADANIE1__LEDS_H_
+
+#define RED_LED_GPIO GPIOA
+#define GREEN_LED_GPIO GPIOA
+#define BLUE_LED_GPIO GPIOB
+#define GREEN2_LED_GPIO GPIOA
+#define RED_LED_PIN 6
+#define GREEN_LED_PIN 7
+#define BLUE_LED_PIN 0
+#define GREEN2_LED_PIN 5
+
+#define Green2LEDon() GREEN2_LED_GPIO->BSRR = 1 << GREEN2_LED_PIN
+#define Green2LEDoff() GREEN2_LED_GPIO->BSRR = 1 << (GREEN2_LED_PIN + 16)
+
+void leds_change_intensity(float red, float green, float blue);
+
+void leds_change_red_intensity(float red);
+
+void leds_change_blue_intensity(float blue);
+
+void leds_change_green_intensity(float green);
+
+void leds_setup();
+
+#endif // ZADANIE1__LEDS_H_

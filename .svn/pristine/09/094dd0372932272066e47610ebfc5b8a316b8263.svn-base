@@ -1,0 +1,66 @@
+#include "USART.h"
+#include <stdbool.h>
+#include <stdlib.h>
+
+#define USART_OUT_BUFFER_SIZE 100
+
+typedef struct {
+    char *arr;
+    unsigned short next_read;
+    unsigned short next_add;
+} USART_out_buffer;
+
+char arr[USART_OUT_BUFFER_SIZE];
+USART_out_buffer out_buffer = {.arr = arr, .next_read = 0, .next_add = 0};
+
+static int USART_can_write() {
+    return USART2->SR & USART_SR_TXE;
+}
+
+static void USART_write_char_worker(char c) {
+    USART2->DR = c;
+}
+
+static void USART_add_char_to_out_buffer(char c) {
+    out_buffer.arr[out_buffer.next_add] = c;
+    out_buffer.next_add++;
+    out_buffer.next_add %= USART_OUT_BUFFER_SIZE;
+}
+
+static bool USART_is_out_buffer_clear() {
+    return out_buffer.next_add != out_buffer.next_read;
+}
+
+void USART_write_from_buffer() {
+    if (USART_is_out_buffer_clear() && USART_can_write()) {
+        USART_write_char_worker(out_buffer.arr[out_buffer.next_read]);
+        out_buffer.next_read++;
+        out_buffer.next_read %= USART_OUT_BUFFER_SIZE;
+    }
+}
+
+void USART_add_string_to_out_buffer(const char *c) {
+    const char *h = c;
+    while (*h != '\0') {
+        USART_add_char_to_out_buffer(*h);
+        h++;
+    }
+}
+
+static void USART_setup_BRR(unsigned baudrate) {
+    USART2->BRR = (PCLK1_HZ + (baudrate / 2U)) / baudrate;
+}
+
+static void USART_activate_lines() {
+    GPIOafConfigure(GPIOA, 2, GPIO_OType_PP, GPIO_Fast_Speed, GPIO_PuPd_NOPULL, GPIO_AF_USART2);
+
+    GPIOafConfigure(GPIOA, 3, GPIO_OType_PP, GPIO_Fast_Speed, GPIO_PuPd_UP, GPIO_AF_USART2);
+}
+
+void USART_setup(unsigned baudrate) {
+    USART2->CR1 = USART_Mode_Rx_Tx | USART_WordLength_8b | USART_Parity_No;
+    USART2->CR2 = USART_StopBits_1;
+    USART2->CR3 = USART_FlowControl_None;
+    USART_activate_lines();
+    USART_setup_BRR(baudrate);
+}

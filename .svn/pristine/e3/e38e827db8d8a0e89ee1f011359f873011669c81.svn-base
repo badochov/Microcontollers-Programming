@@ -1,0 +1,31 @@
+#include "USART.h"
+
+static inline void USART_setup_BRR(unsigned baudrate) {
+  USART2->BRR = (PCLK1_HZ + (baudrate / 2U)) / baudrate;
+}
+
+static inline void USART_activate_lines() {
+  GPIOafConfigure(GPIOA,
+                  2,
+                  GPIO_OType_PP,
+                  GPIO_Fast_Speed,
+                  GPIO_PuPd_NOPULL,
+                  GPIO_AF_USART2);
+
+  GPIOafConfigure(GPIOA,
+                  3,
+                  GPIO_OType_PP,
+                  GPIO_Fast_Speed,
+                  GPIO_PuPd_UP,
+                  GPIO_AF_USART2);
+}
+
+void USART_setup(unsigned baudrate) {
+  USART2->CR1 = USART_Mode_Rx_Tx |
+      USART_WordLength_8b |
+      USART_Parity_No;
+  USART2->CR2 = USART_StopBits_1;
+  USART2->CR3 = USART_FlowControl_None;
+  activate_lines();
+  setup_BRR(baudrate);
+}

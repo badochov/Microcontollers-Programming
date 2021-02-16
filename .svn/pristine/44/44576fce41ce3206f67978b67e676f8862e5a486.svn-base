@@ -1,0 +1,72 @@
+#ifndef ZADANIE1__USART_H_
+#define ZADANIE1__USART_H_
+
+#include <gpio.h>
+#include <stm32.h>
+
+// CR1
+#define USART_Mode_Rx_Tx (USART_CR1_RE | \
+USART_CR1_TE)
+#define USART_Enable USART_CR1_UE
+#define USART_WordLength_8b 0x0000
+#define USART_WordLength_9b USART_CR1_M
+#define USART_Parity_No 0x0000
+#define USART_Parity_Even USART_CR1_PCE
+#define USART_Parity_Odd (USART_CR1_PCE | \
+USART_CR1_PS)
+
+// CR2
+#define USART_StopBits_1 0x0000
+#define USART_StopBits_0_5 0x1000
+#define USART_StopBits_2 0x2000
+#define USART_StopBits_1_5 0x3000
+
+// CR3
+#define USART_FlowControl_None 0x0000
+#define USART_FlowControl_RTS USART_CR3_RTSE
+#define USART_FlowControl_CTS USART_CR3_CTSE
+
+#define HSI_HZ 16000000U
+#define PCLK1_HZ HSI_HZ
+
+#define BAUDRATE 9600U
+
+void USART_setup(unsigned);
+
+inline void USART_enable() {
+  USART2->CR1 |= USART_Enable;
+}
+
+inline int USART_can_read() {
+  return USART2->SR & USART_SR_RXNE;
+}
+
+inline int USART_can_write() {
+  return USART2->SR & USART_SR_TXE;
+}
+
+inline char USART_get_char_worker() {
+  return USART2->DR;
+}
+
+inline void USART_write_char_worker(char c) {
+  USART2->DR = c;
+}
+
+inline void USART_write_char(char c) {
+  for (;;) {
+    if (USART_can_write()) {
+      return USART_write_char_worker(c);
+    }
+  }
+}
+
+inline void USART_write_string(const char *c) {
+  const char *h = c;
+  while (*h != '\0') {
+    USART_write_char(*h);
+    h++;
+  }
+}
+
+#endif //ZADANIE1__USART_H_

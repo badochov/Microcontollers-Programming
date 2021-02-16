@@ -1,8 +1,0 @@
-#include "accelerometer.h"
-
-int main() {
-    accelerometer_setup();
-
-    for (;;) {
-    }
-}

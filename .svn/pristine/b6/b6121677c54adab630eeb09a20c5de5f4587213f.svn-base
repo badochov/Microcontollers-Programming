@@ -1,6 +1,0 @@
-#ifndef ZADANIE3_ACCELEROMETER_H
-#define ZADANIE3_ACCELEROMETER_H
-
-void accelerometer_setup();
-
-#endif //ZADANIE3_ACCELEROMETER_H
